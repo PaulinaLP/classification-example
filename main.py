@@ -3,6 +3,7 @@ import sys
 import pandas as pd
 import json
 from Code.ingest_data import download
+from Code import preprocessing
 
 script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 dependencies_path = os.path.join(script_path, 'dependencies')
@@ -19,6 +20,12 @@ if __name__ == '__main__':
         df_train.to_csv(os.path.join(input_path, 'train.csv'))
     else:
         df_train = pd.read_csv(os.path.join(input_path, 'train.csv'))
+        id_column = configuration['id']
+        target = configuration['target']
+        outliers_fin, outliers_agg = preprocessing.outliers(df_train,id_column)
+
+    if configuration['feature_engineering'] == 1:
+        print("fe")
     if configuration['eda'] == 1:
         print("eda")
     if configuration['train'] == 1:
