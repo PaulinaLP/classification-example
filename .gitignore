@@ -1,3 +1,5 @@
 # Default ignored files
-/.idea/*
-/input/*
+.idea/*
+input/*
+Code/pruebas.py
+output/*
