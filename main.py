@@ -4,6 +4,7 @@ import pandas as pd
 import json
 from Code.ingest_data import download
 from Code import preprocessing
+from Code import eda
 import pickle
 
 script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
@@ -29,11 +30,10 @@ if __name__ == '__main__':
         with open(os.path.join(output_path, 'preprocessor'), 'wb') as f:
             pickle.dump(custom_preprocessor, f)
         custom_preprocessor.transform(df_train)
-
     if configuration['feature_engineering'] == 1:
         print("fe")
     if configuration['eda'] == 1:
-        print("eda")
+        eda.quantitative_analysis(df_train, target)
     if configuration['train'] == 1:
         print("train")
 
