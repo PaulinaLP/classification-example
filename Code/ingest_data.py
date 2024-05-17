@@ -1,6 +1,6 @@
-
 import pyodbc as SQLlibrary
 import pandas as pd
+import threading
 
 
 
@@ -20,7 +20,7 @@ def download_worker(path, server, database, result_list=None):
         ans = "SET ANSI_WARNINGS OFF;"
         result_list.append(db_connection)
         fd = open(path, 'r',encoding='utf-16')
-        query=fd.read()
+        query = fd.read()
         sql_query1 = nocount+ans+query
         columns = [col_desc[0] for col_desc in cursor.description] if cursor.description else []
         df = pd.read_sql(sql_query1, db_connection, columns=columns)
