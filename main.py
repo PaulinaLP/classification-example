@@ -2,11 +2,12 @@ import os
 import sys
 import pandas as pd
 import json
+import pickle
+
 from Code.ingest_data import download
-from Code import preprocessing
+from Code import preprocess
 from Code import eda
 from Code import training
-import pickle
 
 script_path = os.path.abspath(os.path.dirname(sys.argv[0]))
 dependencies_path = os.path.join(script_path, 'dependencies')
@@ -28,23 +29,27 @@ if __name__ == '__main__':
     else:
         # if already downloaded get data from csv
         df_train = pd.read_csv(os.path.join(input_path, 'train.csv'))
-    if configuration['preprocessing'] == 1:
-        custom_preprocessor = preprocessing.CustomPreprocessor(target_column=target, max_ohe=5)
-        df_train = custom_preprocessor.fit_transform(df_train)
-        with open(os.path.join(output_path, 'preprocessor'), 'wb') as f:
-            pickle.dump(custom_preprocessor, f)
     if configuration['eda'] == 1:
         eda.quantitative_analysis(df_train, target)
-    if configuration['train'] == 1:
-        mlflow_uri = configuration['mlflow_uri']
-        experiment_name = 'experiment_rf_1'
-        param_grid = {
-            'n_estimators': [50, 100, 200, 300],
-            'criterion': ['gini', 'entropy'],
-            'max_depth': [None, 10, 20, 30],
-            'min_samples_split': [2, 5, 10],
-            'min_samples_leaf': [1, 2, 4],
-            'max_features': ['auto', 'sqrt', 'log2', None],
-            'bootstrap': [True, False]
-        }
-        training.run_mlflow_experiment(param_grid, mlflow_uri, experiment_name, df_train, target)
+    if configuration['preprocessing'] == 1:
+        preprocessing_pipeline, X_train_preprocessed, X_test_preprocessed, y_train, y_test = (
+            preprocess.preprocess(df_train, target))
+        with open(os.path.join(output_path, 'preprocessing_pipeline'), 'wb') as f:
+            pickle.dump(preprocessing_pipeline, f)
+        if configuration['train'] == 1:
+            mlflow_uri = configuration['mlflow_uri']
+            experiment_name = 'experiment_rf_1'
+            param_grid = {
+                'n_estimators': [50, 100, 200, 300],
+                'criterion': ['gini', 'entropy'],
+                'max_depth': [None, 10, 20, 30],
+                'min_samples_split': [2, 5, 10],
+                'min_samples_leaf': [1, 2, 4],
+                'max_features': ['auto', 'sqrt', 'log2', None],
+                'bootstrap': [True, False]
+            }
+            # training with param grid
+            training.run_mlflow_experiment(param_grid, mlflow_uri, experiment_name, X_train_preprocessed,
+                                           X_test_preprocessed, y_train, y_test)
+
+

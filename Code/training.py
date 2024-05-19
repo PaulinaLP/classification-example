@@ -5,20 +5,11 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import make_scorer, precision_score, recall_score, f1_score, roc_auc_score
 
 
-def run_mlflow_experiment(param_grid, uri, experiment_name, df, target_name):
+def run_mlflow_experiment(param_grid, uri, experiment_name, X_train,
+                                       X_test, y_train, y_test):
     # Set the MLflow tracking URI and experiment name
     mlflow.set_tracking_uri(uri)
     mlflow.set_experiment(experiment_name)
-
-    # Shuffle the DataFrame
-    df = df.sample(frac=1, random_state=42).reset_index(drop=True)
-
-    # Split data into features and target
-    X = df.drop(columns=[target_name])
-    y = df[target_name]
-
-    # Split data into train and test sets with stratification
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y, shuffle=True)
 
     # Initialize RandomForestClassifier
     rf = RandomForestClassifier(random_state=42)
